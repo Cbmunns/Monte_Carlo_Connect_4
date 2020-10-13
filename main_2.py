@@ -26,7 +26,9 @@ def print_board(board):
 def wining_move(board, piece):
     #horizontal
     for c in range(col-3):
+        print(c)
         for r in range(rows):
+            print(r)
             if board[r][c] == piece and board[r][c+1] == piece and board[r][c+2] and board[r][c+3] == piece:
                 return True
     #vertical
@@ -64,8 +66,14 @@ board = create_board()
 print_board(board)
 game_over = False
 turn = 0
+spots_taken = 0
+
 
 while not game_over:
+
+    if spots_taken == 42:
+        game_over = True
+
     #Ask for Player 1 Input:
     if turn == 0:
         selection = int(proper_piece())
@@ -76,6 +84,7 @@ while not game_over:
             row = get_next_open_row(board, selection)
             drop_piece(board, row, selection, 1)
 
+            spots_taken += 1
             turn += 1
             turn = turn % 2
 
@@ -98,6 +107,7 @@ while not game_over:
             row = get_next_open_row(board, selection)
             drop_piece(board, row, selection, 2)
 
+            spots_taken += 1
             turn += 1
             turn = turn % 2
 
