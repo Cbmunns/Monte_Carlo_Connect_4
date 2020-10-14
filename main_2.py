@@ -1,28 +1,28 @@
 import numpy as np
 import sys
 import math
-import monte_carlo_tree_search
+
 
 ROWS = 6
 COL = 7
 
 
-
+#create board
 def create_board():
     board = np.zeros((ROWS ,COL))
     return board
-
+#places piece on board
 def drop_piece(board, row, selection, piece):
     board[row][selection] = piece
-
+#checks if column is full
 def is_valid_location(board, selection):
     return board[ROWS-1][selection] == 0
-
+#finds the lowest open spot
 def get_next_open_row(board, selection):
     for r in range(ROWS):
         if board[r][selection] == 0:
             return r
-
+#reverse board to be more easily read
 def print_board(board):
     print(np.flip(board, 0))
 
@@ -75,64 +75,6 @@ def proper_piece():
     return x
 
 
-class Node():
-    def __init__(self, key, parent, move, board):
-        self.key = key
-        self.move = move
-        self.board = board
-        self.visits = 0
-        self.score = 0.0
-        self.weight = 0
-        self.children = []
-        self.parent = parent
-
-    def add_child(self, child_state, move):
-        pass
-    def calc_weight(total_weight, visits, score):
-        weight = (score/visits) + 2*(math.sqrt((math.log(total_weight)/visits)))
-
-    def back_propagate(leaf):
-
-        leaf.parent.score += leaf.score
-
-
-def search_leaf_nodes(root, leafs):
-    
-
-    #if node is empty return
-    if root == None:
-        return
-
-    #if no children then leaf, return data
-    if root.children == []:
-        return root.state.append(leafs)
-
-    #if it has children search through them
-    for i in range(root.children):
-        search_leaf_nodes(root.children[i])
-
-def monte_find_moves(board):
-    pass
-
-def monte_carlo(board):
-    key = 0
-    tree = {}
-
-    copy_board = np.copy(board)
-    root = Node(key, None, None, copy_board)
-
-    tree[key] = root
-    key += 1
-
-
-    for i in range(100):
-        root = tree[0]
-        #print(x.board)
-
-
-
-
-
 
 def play_game():
     board = create_board()
@@ -141,7 +83,7 @@ def play_game():
     turn = 0
     spots_taken = 0
     score = 0
-    monte_carlo(board)
+    
     while not game_over:
 
         
