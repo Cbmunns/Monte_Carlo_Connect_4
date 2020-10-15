@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import math
+import random
 
 
 ROWS = 6
@@ -33,29 +34,29 @@ def wining_move(board, piece):
     for c in range(COL-3):
         for r in range(ROWS):
             if board[r][c] == piece and board[r][c+1] == piece and board[r][c+2] == piece and board[r][c+3] == piece:
-                print("hor " + str(piece))
-                print()
+                #print("hor " + str(piece))
+                #print()
                 return True
     #vertical
     for c in range(COL):
         for r in range(ROWS-3):
             if board[r][c] == piece and board[r+1][c] == piece and board[r+2][c] == piece and board[r+3][c] == piece:
-                print("vert " + str(piece))
-                print()
+                #print("vert " + str(piece))
+                #print()
                 return True
     #ascending
     for c in range(COL-3):
         for r in range(ROWS-3):
             if board[r][c] == piece and board[r+1][c+1] == piece and board[r+2][c+2] == piece and board[r+3][c+3] == piece:
-                print("asc "+ str(piece))
-                print()
+                #print("asc "+ str(piece))
+                #print()
                 return True
     #decending
     for c in range(COL-3):
         for r in range(3, ROWS):
             if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
-                print("desc " + str(piece))
-                print()
+                #print("desc " + str(piece))
+                #print()
                 return True
 
 
@@ -96,7 +97,7 @@ def traverse(node):
     global tree
     global key
 
-    best_move = None
+    best = 0
     best_weight = 0
     curr_weight = 0
 
@@ -107,57 +108,133 @@ def traverse(node):
 
         #if there is an unvisited node just select it
         if tree[node.children[i]].visits == 0:
-            print(0)
+            #print(0)
             return tree[node.children[i]].key
-
+    for i in range(len(node.children)):
         # else get the weight of all children and choose the best
-        else:
-            print(1)
-            curr_weight = (tree[node.children[i]].score/tree[node.children[i]].visits) + 2*(math.sqrt((math.log(tree[0].visits)/tree[node.children[i]].visits)))
-            if curr_weight > best_weight:
-                best_weight = curr_weight
-                best_move = tree[node.children[i]].key
+        curr_weight = (tree[node.children[i]].score/tree[node.children[i]].visits) + 2*(math.sqrt((math.log(tree[0].visits)/tree[node.children[i]].visits)))
+        curr_weight = round(curr_weight,5)
+        if curr_weight > best_weight:
+            best_weight = curr_weight
+            #print(tree[node.children[i]].key)
+            best = tree[node.children[i]].key
+            print(best)
+            print("this: " + str(curr_weight) + str(best))
+        
 
     # If the best value has children traverse them
-    if tree[best_move].children != []:
-        print(2)    
-        traverse(tree[best_move])
+    if tree[best].children != []:
+        print(300)    
+        traverse(tree[best])
     
     # Else we need to expand and create the best options children
     else:
-        print(4)
+        print(400)
         for i in range(0,7):
+            #print(1999)
+            #print_board(tree[best].board)
             #if that column has an empty spot, move is vaild
-            if is_valid_location(tree[best_move].board, i):
+            if is_valid_location(tree[best].board, i):
+                print(1999)
                 #print(i)
                 #find the lowest row you can place
-                row = get_next_open_row(tree[best_move].board, i)
+                row = get_next_open_row(tree[best].board, i)
                 #create node for move
-                node = Node(key, tree[best_move].key, i, tree[best_move].board) 
+                node = Node(key, tree[best].key, i, tree[best].board) 
                 #place node in tree with key           
                 tree[key] = node
                 #add key of node as children of root
-                tree[best_move].children.append(key)
+                tree[best].children.append(key)
                 #print_board(tree[key].board)
                 #place piece on that moves board
                 drop_piece(tree[key].board, row, i, 2)
+                print_board(tree[key].board)
                 #increase key
                 key += 1
 
-        traverse(tree[best_move])
+        traverse(tree[best])
 
     
 def rollout(node):
-    pass
+
+    board = np.copy(node.board)
+    #print_board(board)
+    game_over = False
+    turn = 0
+    spots_taken = 0
+    score = 0
     
-def rollout_policy(node):
-    pass
-def backpropagate(node, result):
-    pass
+    
+    #print(moves)
+    while not game_over:
+    
+        
+        #Ask for Player 1 Input:
+        if turn == 0:
+            selection = random.randrange(0,7)
+            
+            
+
+            if is_valid_location(board, selection):
+                row = get_next_open_row(board, selection)
+                drop_piece(board, row, selection, 1)
+
+                spots_taken += 1
+                turn += 1
+                turn = turn % 2
+
+                if wining_move(board, 1):
+                    
+                    score = 1
+                    game_over = True
+                    #print_board(board)
+            
+
+        else:
+            selection = random.randrange(0,7)
+            
+            
+            if is_valid_location(board, selection):
+                row = get_next_open_row(board, selection)
+                drop_piece(board, row, selection, 2)
+
+                spots_taken += 1
+                turn += 1
+                turn = turn % 2
+
+                if wining_move(board, 2):
+                    
+                    score = 2
+                    game_over = True
+                    #print_board(board)
+            
+
+        #print_board(board)
+        #print()
+        #print(spots_taken)
+
+        if spots_taken == 42:
+            score = 3
+            #print_board(board)
+            game_over = True
+    return score
+
+
+    
+
+
+    
+def backpropagate(node):
+    global tree
+    if node.parent != None:
+        tree[node.parent].visits += node.visits
+        tree[node.parent].score += node.score
+        backpropagate(tree[node.parent])
+
 def best_child(node):
     pass
 
-def monte_carlo(board):
+def monte_carlo(board, player):
     #creat keys for nodes
     global key
     #create dict to hold tree
@@ -202,20 +279,46 @@ def monte_carlo(board):
 
 
 
-    for i in range(3):
+    for i in range(8):
+        print("hi")
         leaf_key = traverse(tree[0])
         simulation = rollout(tree[leaf_key])
-        #backpropagate(leaf_key, simulation)
+        if simulation == player:
+            point = 1
+        elif simulation == 3:
+            point = 0.5
+        else:
+            point = 0
+        #print(point)
+        tree[leaf_key].visits += 1
+        tree[leaf_key].score += point
+        backpropagate(tree[leaf_key])
+        for i in range(7):
+            x = tree[tree[0].children[i]].visits
+            print(x)
+        print(tree[0].visits)
+        
+        #print(tree[0].visits)
         #print(x.board)
         #print(leaf_key)
     
+    final_move = None
+    final_score = 0
+    for i in range(7):
+        x = tree[tree[0].children[i]].score
 
-    return tree
+        if x > final_score:
+            final_score = x
+            final_move = tree[tree[0].children[i]].move
+
+
+    return final_move
 
 
 
 board = create_board()
 #print_board(board)
-monte_carlo(board)
+x = monte_carlo(board, 2)
+print(x)
 #for i in range (1,8):
     #print_board(x[0].children[i].board)
