@@ -1,9 +1,4 @@
 import random
 arr = []
 
-for i in range(45):
-    x = random.randrange(0,7)
-    arr.append(x)
-    
-for i in range(len(arr)):
-    print(arr[i])
+curr_weight = (0/0) + 7*(math.sqrt((math.log(0)/0)))

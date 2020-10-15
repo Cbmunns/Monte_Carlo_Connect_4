@@ -1,6 +1,8 @@
 import numpy as np
 import sys
-import math
+import monte_carlo_tree_search
+from monte_carlo_tree_search import monte_carlo
+
 
 
 ROWS = 6
@@ -100,6 +102,8 @@ def play_game():
                 spots_taken += 1
                 turn += 1
                 turn = turn % 2
+                print_board(board)
+                print()
 
                 if wining_move(board, 1):
                     
@@ -113,9 +117,10 @@ def play_game():
                 print()
 
         else:
-            selection = int(proper_piece())
-            print()
-            selection -= 1
+            print("---------------------------")
+            print("    Computer Thinking")
+            print("---------------------------")
+            selection = monte_carlo(board, 2, 1)
 
             if is_valid_location(board, selection):
                 row = get_next_open_row(board, selection)
@@ -124,6 +129,9 @@ def play_game():
                 spots_taken += 1
                 turn += 1
                 turn = turn % 2
+                print("    Computers Move")
+                print_board(board)
+                print()
 
                 if wining_move(board, 2):
                     
@@ -136,8 +144,8 @@ def play_game():
                 print("---------------------------")
                 print()
 
-        print_board(board)
-        print()
+        # print_board(board)
+        # print()
         #print(spots_taken)
 
         if spots_taken == 42:

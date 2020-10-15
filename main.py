@@ -1,167 +1,155 @@
-import pygame
-import pygame.freetype
-import pygame_menu
+import numpy as np
+import sys
+import math
 
 
-count = None
-arr = []
-
-game_type = None
-
-player = None
+ROWS = 6
+COL = 7
 
 
-def show_board(board):
-    global count
-    print() 
-    print("    Moves made: ", count)
-    for i in range(0, 7):
-        print(board[i])
-    count += 1
-    print()
-
-def swap_player(current):    
-    if current == "Player_1":
-        return "Player_2"
-    else:
-        return "Player_1"
-
-
+#create board
 def create_board():
-    """
-    This creates the board with usable and unusable coordinates
-    """
-    # Set the rows and the columns to 7
-    col = 8 
-    row = 7
-    global arr
-    arr = []
-    rows = 6
-    columns = 1
-    # Create a 2D Array full of 0's with 6 rows and 7 columns
-    arr = [[0 for i in range(col)] for j in range(row)]
-
-    for i in range (6):
-        arr[i][0] = rows
-        rows -= 1 
-    for i in range (7):
-        arr[6][i+1] = columns
-        columns += 1 
-
-    
-    return arr
+    board = np.zeros((ROWS ,COL))
+    return board
+#places piece on board
+def drop_piece(board, row, selection, piece):
+    board[row][selection] = piece
+#checks if column is full
+def is_valid_location(board, selection):
+    return board[ROWS-1][selection] == 0
+#finds the lowest open spot
+def get_next_open_row(board, selection):
+    for r in range(ROWS):
+        if board[r][selection] == 0:
+            return r
+#reverse board to be more easily read
+def print_board(board):
+    print(np.flip(board, 0))
 
 
-def place_piece(player):
-    global arr
-    global count
-    coord = [0]*2
+def wining_move(board, piece):
+    #horizontal
+    for c in range(COL-3):
+        for r in range(ROWS):
+            if board[r][c] == piece and board[r][c+1] == piece and board[r][c+2] == piece and board[r][c+3] == piece:
+                print("hor " + str(piece))
+                print()
+                return True
+    #vertical
+    for c in range(COL):
+        for r in range(ROWS-3):
+            if board[r][c] == piece and board[r+1][c] == piece and board[r+2][c] == piece and board[r+3][c] == piece:
+                print("vert " + str(piece))
+                print()
+                return True
+    #ascending
+    for c in range(COL-3):
+        for r in range(ROWS-3):
+            if board[r][c] == piece and board[r+1][c+1] == piece and board[r+2][c+2] == piece and board[r+3][c+3] == piece:
+                print("asc "+ str(piece))
+                print()
+                return True
+    #decending
+    for c in range(COL-3):
+        for r in range(3, ROWS):
+            if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
+                print("desc " + str(piece))
+                print()
+                return True
 
-    placed = False
+def proper_piece():   
 
-    show_board(arr)
-
-    print("Okay ", player, " pick a position")
-    x = input("x: ")
+    x = input("Player 1 make your selection 1-7 or Q to quit: ")
  
-    while x not in ["1","2","3","4","5","6","7"]:
+    while x not in ["1","2","3","4","5","6","7","Q"]:
+        
         print()   
         print("---------------------------")
         print(" Incorrect input, try 1-7")
         print("---------------------------")
         print()
-        count -= 1
-        show_board(arr)
         x = input("x: ")
+
+    if x == "Q":
+            sys.exit()
+    return x
+
+
+
+def play_game():
+    board = create_board()
+    print_board(board)
+    game_over = False
+    turn = 0
+    spots_taken = 0
+    score = 0
     
-    while placed == False:
-        if arr[0][int(x)] != 0:
-            print()   
-            print("---------------------------")
-            print("Column full, choose another")
-            print("---------------------------")
+    while not game_over:
+
+        
+        #Ask for Player 1 Input:
+        if turn == 0:
+            selection = int(proper_piece())
             print()
-            count -= 1
-            show_board(arr)
-            x = input("x: ")
-            while x not in ["1","2","3","4","5","6","7"]:
+            selection -= 1
+
+            if is_valid_location(board, selection):
+                row = get_next_open_row(board, selection)
+                drop_piece(board, row, selection, 1)
+
+                spots_taken += 1
+                turn += 1
+                turn = turn % 2
+
+                if wining_move(board, 1):
+                    
+                    score = 1
+                    game_over = True
+            else:
                 print()   
                 print("---------------------------")
-                print(" Incorrect input, try 1-7")
+                print("Column full, choose another")
                 print("---------------------------")
                 print()
-                count -= 1
-                show_board(arr)
-                x = input("x: ")
+
         else:
-            placed = True
+            selection = int(proper_piece())
+            print()
+            selection -= 1
+
+            if is_valid_location(board, selection):
+                row = get_next_open_row(board, selection)
+                drop_piece(board, row, selection, 2)
+
+                spots_taken += 1
+                turn += 1
+                turn = turn % 2
+
+                if wining_move(board, 2):
+                    
+                    score = 2
+                    game_over = True
+            else:
+                print()   
+                print("---------------------------")
+                print("Column full, choose another")
+                print("---------------------------")
+                print()
+
+        print_board(board)
+        print()
+        #print(spots_taken)
+
+        if spots_taken == 42:
+            game_over = True
 
 
-    if player == "Player_1":
-            for  i in reversed(range(7)):
-                if arr[i][int(x)] == 0:
-                    #arr[i][int(x)] = 1
-                    coord[0] = i
-                    coord[1] = int(x)
-                    return coord
-            
-
-
-            
-    elif player == "Player_2":
-        for  i in reversed(range(7)):
-            if arr[i][int(x)] == 0:
-                coord[0] = i
-                coord[1] = int(x)
-                return coord
-
-def check_win(place, player):
-    global arr
-    win = False
-    count = 0
-
-    if player == "Player_1":
-        piece = 1
-    else:
-        piece = 2
-
-    #ascending
-
-    #descending
-    count = 0
-    for i in range(6):
-        if place[0]+i < 6 and place[1]+i < 8:
-            if arr[place[0]+i][place[1]+i] == piece:
-                count += 1
-    for i in range(1,6):
-        if place[0]-i > -1 and place[1]-i > 0:
-            if arr[place[0]-i][place[1]-i] == piece :
-                count += 1
-    if count == 4:
-        show_board(arr)
-        win = True
-
-    #horizontal
-    count = 0
-    for i in range(1,8):
-        if arr[place[0]][i] == piece:
-            count += 1
-    if count == 4:
-        show_board(arr)
-        win = True
-
-
-    #vertical
-    count = 0
-    for i in range(6):
-        if arr[i][place[1]] == piece:
-            count += 1      
-    if count == 4:
-        show_board(arr)
-        win = True
-
-    return win
-
+    if score == 1:
+        print("Player 1 wins!")
+    elif score == 2:
+        print("Player 2 wins!")
+    else: 
+        print("It's a draw!")
 
 def menu():
     
@@ -183,47 +171,19 @@ def menu():
         game_type = input("           What is your selection? ")
 
     if game_type == "1":
-        human_computer()
+        print()
+        print("Human Vs Computer")
+        print()
+        play_game()
         
 
 
 
     elif game_type == "2":
-        print("computer")
-        show_board(arr)
-
-def human_computer():
-    global player
-    global arr
-    global count
-
-    win = False
-    
-    player = "Player_1"
-    count = 0
-
-    create_board()
-
-    while win == False:
-        place = place_piece(player)
-        print (place[1], 6 - place[0])
-        if player == "Player_1":
-            arr[place[0]][place[1]] = 1
-        if player == "Player_2":
-            arr[place[0]][place[1]] = 2
-
-        win = check_win(place, player)
-        player = swap_player(player)
+        print()
+        print("Computer vs Computer")
+        print()
+        play_game()
 
 
-
-        if count == 42:
-            win = True
-    print("It was a draw!")
-    menu()
-
-
-#driver code
 menu()
-    
-
