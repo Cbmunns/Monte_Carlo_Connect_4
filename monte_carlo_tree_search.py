@@ -69,9 +69,12 @@ class Node():
 def traverse(node,player,opponent, exploration):
     
     # Set markers for tracking
-    best = 0
+    best = None
     best_weight = 0
     curr_weight = 0
+    moves = [0,1,2,3,4,5,6]
+
+
 
     #look through children  
     for j in range(len(node.children)):
@@ -90,7 +93,10 @@ def traverse(node,player,opponent, exploration):
             best_weight = curr_weight
             # Record the position of best child in parent array
             best = i
-            
+
+    # if no children can exist 
+    if best == None:
+        return node        
     
     
     # If the best weight has children traverse them
@@ -100,28 +106,36 @@ def traverse(node,player,opponent, exploration):
     
     # Else we need to expand and create the best options children
     else:
-        # Generate some random move for the opponent and place it on best options board
+        # Generate some random move list for the opponent
         random.shuffle(moves)
-        j = moves[0]
-        while is_valid_location(node.children[best].board, j) == False:
-            random.shuffle(moves)
-            j = moves[0]
-        ro = get_next_open_row(node.children[best].board, j)
-        drop_piece(node.children[best].board, ro, j, opponent)
+        
+        # Run through list and if a valid place is available, place and break
+        for i in range (7):
+            if is_valid_location(node.children[best].board, moves[0]):
+                ro = get_next_open_row(node.children[best].board, moves[0])
+                drop_piece(node.children[best].board, ro, moves[0], opponent)
+                break
+            # Pop the move that didn't work
+            else:
+                moves.pop(0)
+        # If no move was valid, board was full return, original node
+        if moves == []:
+            return node
+            
 
-        # Generat all possible moves and place them in their own node
+        # Generate all possible moves and place them in their own node
         for i in range(0,7):
             
-            #if that column has an empty spot, move is vaild
+            # If that column has an empty spot, move is vaild
             if is_valid_location(node.children[best].board, i):
                 
-                #find the lowest row you can place
+                # Find the lowest row you can place
                 row = get_next_open_row(node.children[best].board, i)
-                #create node for move
+                # Create node for move
                 no = Node(node.children[best], i, node.children[best].board) 
-                #place node in tree with key           
+                # Place a move on that nodes board           
                 drop_piece(no.board, row, i, player)
-                #add key of node as children of root
+                # Add node as child of best parent
                 node.children[best].children.append(no)
           
                 
@@ -184,7 +198,7 @@ def rollout(node, player, opponent):
                     score = player
                     game_over = True
                     
-        # Since the board could be in any state just check there are open spots   
+        # Since the board could be in any state just check if there are open spots   
         count = 0
         for c in range(COL):
             for r in range(ROWS):
@@ -226,9 +240,9 @@ def monte_carlo(copy, player, opponent, exploration, iteration):
             row = get_next_open_row(root.board, i)
             # Create node for move
             node = Node(root, i, root.board) 
-            # Place node in tree with key           
+            # Place a move on that nodes board           
             drop_piece(node.board, row, i, player)
-            # Add key of node as children of root
+            # Add node as child of best parent
             root.children.append(node)
 
     # For for how ever many times we want to run the simulation        
@@ -243,7 +257,7 @@ def monte_carlo(copy, player, opponent, exploration, iteration):
             point = 0.5
         else:
             point = 0
-        # add a visit to this node and the score that was earned win/lose/draw
+        # Add a visit to this node and the score that was earned win/lose/draw
         leaf_node.visits += 1
         leaf_node.score += point
         # Backprop up to the root
