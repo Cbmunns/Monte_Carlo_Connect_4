@@ -94,7 +94,7 @@ def traverse(node,player,opponent, exploration):
             # Record the position of best child in parent array
             best = i
 
-    # if no children can exist 
+    # if we are unable to calc weight return original node 
     if best == None:
         return node        
     

@@ -68,10 +68,10 @@ class Connect_4():
 
 
 # Check to see if the human input is valid to be played
-def proper_piece():
+def proper_piece(position):
 
     # Take in input
-    x = input("Player 1 make your selection 1-7 or Q to quit: ")
+    x = input("Player " + str(position) + " make your selection 1-7 or Q to quit: ")
     # Check if valid, if not repeat
     while x not in ["1","2","3","4","5","6","7","Q"]:
         
@@ -88,8 +88,8 @@ def proper_piece():
     return x
 
 # Define how a human player selects a piece
-def human_player():
-    selection = int(proper_piece())
+def human_player(position):
+    selection = int(proper_piece(position))
     print()
     selection -= 1
     return selection
@@ -130,7 +130,7 @@ def play_game(exploration, iteration, human):
             # Check if human or computer get piece
             # If human
             if human == 1:
-                selection = human_player()
+                selection = human_player(human)
             # If computer vs computer
             elif human == 0:
                 selection = computer_player(board, comp, human + 1, exploration, iteration)
@@ -170,7 +170,7 @@ def play_game(exploration, iteration, human):
             # Check if human or computer get piece
             # For human
             if human == 2:
-                selection = human_player()
+                selection = human_player(human)
             # For computer if player 1 is computer
             elif human == 0:
                 selection = computer_player(board, comp, human + 1, exploration, iteration)
@@ -225,6 +225,8 @@ def play_game(exploration, iteration, human):
     # If draw
     else: 
         print("It's a draw!")
+    
+    menu()
 
 
 # Create opening menu function
@@ -236,10 +238,11 @@ def menu():
     print("Please make a selection from the choices below!")
     print("           1. Human vs Computer")
     print("           2. Computer vs Computer")
+    print("           3. Quit")
     game_type = input("           What is your selection? ")
 
     # Loop if invalid choice
-    while game_type != "1" and game_type != "2":
+    while game_type != "1" and game_type != "2" and game_type != "3":
         print()
         print("       incorrect selection! try again!")
         print()
@@ -247,6 +250,7 @@ def menu():
         print("Please make a selection from the choices below!")
         print("           1. Human vs Computer")
         print("           2. Computer vs Computer")
+        print("           3. Quit")
         game_type = input("           What is your selection? ")
 
     # If 1 Human vs Computer collect exploration constant, Monte Carlo iterations and
@@ -275,6 +279,9 @@ def menu():
         print()
         human = 0
         play_game(int(exploration),int(iterations), int(human))
+
+    elif game_type == "3":
+        sys.exit()
         
 
 
